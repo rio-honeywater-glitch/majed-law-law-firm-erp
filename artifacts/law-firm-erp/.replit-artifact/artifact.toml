@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Majed Sultan Al-Subaie Law Firm ERP"
+version = "1.0.0"
+id = "artifacts/law-firm-erp"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23165
+
+[services.development]
+run = "pnpm --filter @workspace/law-firm-erp run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/law-firm-erp", "run", "build" ]
+publicDir = "artifacts/law-firm-erp/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23165"
+BASE_PATH = "/"

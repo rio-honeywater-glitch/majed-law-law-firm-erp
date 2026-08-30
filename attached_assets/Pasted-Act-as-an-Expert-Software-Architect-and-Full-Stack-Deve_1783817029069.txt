@@ -1,0 +1,29 @@
+Act as an Expert Software Architect and Full-Stack Developer.
+We are transforming this single-tenant ERP into a Multi-Tenant SaaS platform named "Towala-Legal". 
+
+CRITICAL CONSTRAINT: You MUST NOT modify or break the existing UI/App pages. The existing ERP app should now be served under a specific route (e.g., `/app/*`). 
+
+Please implement the following architectural phase:
+
+1. Routing & Workspaces Separation:
+- `/` -> Create a new modern SaaS Landing Page for "Towala-Legal". Display the ERP features and a pricing plan (First month: 1825 SAR, Renewal: 800 SAR/month. Setup: Free).
+- `/checkout` -> Create a mock payment gateway UI. It should accept dummy credit card info, simulate processing, and register a new Tenant.
+- `/towala-admin` -> Create a dedicated Super-Admin control panel (restricted to a new SUPER_ADMIN role) to view all subscribed law firms, their payment statuses, and active users.
+- `/app/*` -> Move the entry point of the current existing ERP application here.
+
+2. Multi-Tenancy Database Migration:
+- Create a `Tenant` model (id, name, logoUrl, primaryColor, secondaryColor, status).
+- Create a `Subscription` model for the mock payments.
+- Add a `tenant_id` Foreign Key to the `User` table and to ALL existing entity tables (Cases, Clients, Contracts, Tasks, Hearings, etc.).
+- Update the Prisma/ORM schema and run the migration safely.
+
+3. Strict Data Isolation (Backend Logic):
+- Create a backend middleware/interceptor that extracts the `tenant_id` from the authenticated user's session.
+- Update ALL existing API endpoints to strictly filter queries using this `tenant_id`. No data leakage between tenants is permitted.
+
+4. Dynamic Theming (Frontend):
+- During onboarding, when a user uploads their law firm's logo, implement a utility (like vibrant.js or similar) to extract the primary and secondary colors.
+- Save these colors to the `Tenant` record.
+- In the `/app/*` routes, inject these colors as CSS variables dynamically so the UI matches the tenant's brand identity automatically.
+
+Provide the updated routing configuration, the database schema changes, and the mock payment component.

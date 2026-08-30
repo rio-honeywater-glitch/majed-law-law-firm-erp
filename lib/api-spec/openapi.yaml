@@ -1,0 +1,2944 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Majed Sultan Al-Subaie Law Firm ERP API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: dashboard
+    description: Dashboard & analytics
+  - name: clients
+    description: Client management
+  - name: contracts
+    description: Contract management
+  - name: cases
+    description: Case management
+  - name: pleadings
+    description: Pleading management
+  - name: hearings
+    description: Hearing management
+  - name: executions
+    description: Execution management
+  - name: notifications
+    description: System notifications
+  - name: mojDirectory
+    description: MoJ judicial directory
+  - name: ai
+    description: AI Legal Assistant (RAG)
+  - name: profile
+    description: Current user profile self-service
+  - name: settings
+    description: System settings
+
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ───────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user with tenant theme and branding
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: OK
+
+  # ─── DASHBOARD ──────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/upcoming-hearings:
+    get:
+      operationId: getUpcomingHearings
+      tags: [dashboard]
+      summary: Get upcoming hearings within the given number of days (default 7)
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            enum: [7, 30, 60]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HearingWithCase"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/case-status-breakdown:
+    get:
+      operationId: getCaseStatusBreakdown
+      tags: [dashboard]
+      summary: Get case counts grouped by status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseStatusBreakdown"
+
+  # ─── CLIENTS ────────────────────────────────────────────────────────────────
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List all clients
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create a new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get client by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── CONTRACTS ──────────────────────────────────────────────────────────────
+  /contracts:
+    get:
+      operationId: listContracts
+      tags: [contracts]
+      summary: List contracts
+      parameters:
+        - name: clientId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+    post:
+      operationId: createContract
+      tags: [contracts]
+      summary: Create contract (SYSTEM_MANAGER only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+
+  /contracts/{id}:
+    get:
+      operationId: getContract
+      tags: [contracts]
+      summary: Get contract by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateContract
+      tags: [contracts]
+      summary: Update contract (SYSTEM_MANAGER only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    delete:
+      operationId: deleteContract
+      tags: [contracts]
+      summary: Delete contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /contracts/{id}/generate-pdf:
+    post:
+      operationId: generateContractPdf
+      tags: [contracts]
+      summary: Generate a PDF for the contract (SYSTEM_MANAGER only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: PDF generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractPdfResult"
+        "404":
+          description: Not found
+        "500":
+          description: PDF generation failed
+
+  /contracts/{id}/send:
+    post:
+      operationId: sendContractToClient
+      tags: [contracts]
+      summary: Email the generated contract PDF to the client (SYSTEM_MANAGER only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contract sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractSendResult"
+        "400":
+          description: Contract has no PDF or client has no email
+        "404":
+          description: Not found
+        "503":
+          description: Mailer not configured
+        "500":
+          description: Sending failed
+
+  /contracts/{id}/upload-signed:
+    post:
+      operationId: uploadSignedContract
+      tags: [contracts]
+      summary: Upload the client-signed contract PDF (SYSTEM_MANAGER only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Signed contract uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractSignedUploadResult"
+        "400":
+          description: No file provided or invalid file type
+        "404":
+          description: Not found
+        "500":
+          description: Upload failed
+
+  # ─── CASES ──────────────────────────────────────────────────────────────────
+  /cases:
+    get:
+      operationId: listCases
+      tags: [cases]
+      summary: List cases
+      parameters:
+        - name: clientId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: outcome
+          in: query
+          schema:
+            type: string
+            enum: [WON, LOST, PENDING]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Case"
+    post:
+      operationId: createCase
+      tags: [cases]
+      summary: Create a case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+
+  /cases/{id}/documents:
+    get:
+      operationId: listCaseDocuments
+      tags: [cases]
+      summary: List documents for a case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CaseDocument"
+    post:
+      operationId: uploadCaseDocument
+      tags: [cases]
+      summary: Upload a PDF document for a case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadCaseDocumentBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseDocument"
+
+  /cases/{id}/documents/{docId}:
+    patch:
+      operationId: updateCaseDocument
+      tags: [cases]
+      summary: Update a case document's court status and reply details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCaseDocumentInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseDocument"
+    delete:
+      operationId: deleteCaseDocument
+      tags: [cases]
+      summary: Soft-delete a case document (records deleter identity)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Soft-deleted document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseDocument"
+
+  /cases/{id}:
+    get:
+      operationId: getCase
+      tags: [cases]
+      summary: Get case by ID with all sub-entities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCase
+      tags: [cases]
+      summary: Update case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaseUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+    delete:
+      operationId: deleteCase
+      tags: [cases]
+      summary: Delete case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── PLEADINGS ───────────────────────────────────────────────────────────────
+  /pleadings:
+    get:
+      operationId: listPleadings
+      tags: [pleadings]
+      summary: List pleadings
+      parameters:
+        - name: caseId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pleading"
+    post:
+      operationId: createPleading
+      tags: [pleadings]
+      summary: Create a pleading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PleadingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pleading"
+
+  /pleadings/{id}:
+    get:
+      operationId: getPleading
+      tags: [pleadings]
+      summary: Get pleading by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pleading"
+        "404":
+          description: Not found
+    patch:
+      operationId: updatePleading
+      tags: [pleadings]
+      summary: Update pleading
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PleadingUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pleading"
+    delete:
+      operationId: deletePleading
+      tags: [pleadings]
+      summary: Delete pleading
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── HEARINGS ────────────────────────────────────────────────────────────────
+  /hearings:
+    get:
+      operationId: listHearings
+      tags: [hearings]
+      summary: List hearings
+      parameters:
+        - name: caseId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hearing"
+    post:
+      operationId: createHearing
+      tags: [hearings]
+      summary: Create a hearing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+
+  /hearings/{id}:
+    get:
+      operationId: getHearing
+      tags: [hearings]
+      summary: Get hearing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateHearing
+      tags: [hearings]
+      summary: Update hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+    delete:
+      operationId: deleteHearing
+      tags: [hearings]
+      summary: Delete hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── EXECUTIONS ──────────────────────────────────────────────────────────────
+  /executions:
+    get:
+      operationId: listExecutions
+      tags: [executions]
+      summary: List executions
+      parameters:
+        - name: caseId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Execution"
+    post:
+      operationId: createExecution
+      tags: [executions]
+      summary: Create an execution record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecutionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+
+  /executions/transfer-order-summary:
+    get:
+      operationId: getExecutionTransferOrderSummary
+      tags: [executions]
+      summary: Count active executions that need a new transfer order (7+ days since last)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutionTransferOrderSummary"
+
+  /executions/{id}:
+    get:
+      operationId: getExecution
+      tags: [executions]
+      summary: Get execution by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateExecution
+      tags: [executions]
+      summary: Update execution (payment update auto-calculates remaining)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecutionUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+    delete:
+      operationId: deleteExecution
+      tags: [executions]
+      summary: Delete execution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /executions/{id}/transfer-order:
+    post:
+      operationId: recordTransferOrder
+      tags: [executions]
+      summary: Record a transfer order action for this week (stamps current timestamp)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated execution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+        "404":
+          description: Not found
+
+  /executions/{id}/transfer-order-logs:
+    get:
+      operationId: listExecutionTransferOrderLogs
+      tags: [executions]
+      summary: List all transfer-order log entries for a given execution (newest first)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransferOrderLog"
+        "404":
+          description: Not found
+
+  # ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications for current user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    patch:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: OK
+
+  /notifications/missed-push:
+    get:
+      operationId: getMissedPushNotifications
+      tags: [notifications]
+      summary: Get unacknowledged missed Expo push notifications for the current user
+      description: >
+        Returns failed Expo push notification records that have not yet been acknowledged
+        by the mobile app. Used to display a "missed notifications" banner on app open.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissedPushResponse"
+
+  /notifications/missed-push/acknowledge:
+    post:
+      operationId: acknowledgeMissedPushNotifications
+      tags: [notifications]
+      summary: Acknowledge (dismiss) all missed push notifications for the current user
+      responses:
+        "200":
+          description: OK
+
+  # ─── MOJ DIRECTORY ───────────────────────────────────────────────────────────
+  /moj-directory/search:
+    get:
+      operationId: searchMojDirectory
+      tags: [mojDirectory]
+      summary: Search MoJ directory by court name
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MojDirectorySearchResult"
+
+  /moj-directory/upload:
+    post:
+      operationId: uploadMojDirectory
+      tags: [mojDirectory]
+      summary: Upload MoJ directory PDF (SYSTEM_MANAGER only)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Upload successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MojUploadResult"
+        "403":
+          description: Forbidden
+
+  # ─── PROFILE (self-service for any authenticated user) ──────────────────────
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get current user's own profile
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update current user's own profile (name, email, password, avatar)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "409":
+          description: Email already exists
+
+  # ─── USERS ───────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users (for task assignment)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserSummary"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a new user (manager only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "403":
+          description: Forbidden
+        "409":
+          description: Email already exists
+
+  /users/{id}:
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user (manager only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+        "409":
+          description: Email already exists
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user (manager only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "400":
+          description: Cannot delete own account
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
+  # ─── SYSTEM SETTINGS ─────────────────────────────────────────────────────────
+  /settings/test-email:
+    post:
+      operationId: sendOfficialSenderTestEmail
+      tags: [settings]
+      summary: Send a test email from the official sender (SYSTEM_MANAGER only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestEmailInput"
+      responses:
+        "200":
+          description: Test email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestEmailResponse"
+        "400":
+          description: Invalid recipient or missing official sender
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "409":
+          description: Recipient belongs to a registered client
+        "502":
+          description: Resend rejected the message
+        "503":
+          description: Resend is not configured
+
+  /settings/{key}:
+    get:
+      operationId: getSystemSetting
+      tags: [settings]
+      summary: Get a system setting value
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemSetting"
+    put:
+      operationId: updateSystemSetting
+      tags: [settings]
+      summary: Update a system setting (SYSTEM_MANAGER only)
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: boolean
+                numericValue:
+                  type: integer
+                textValue:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemSetting"
+        "403":
+          description: Forbidden
+
+  # ─── TASKS ───────────────────────────────────────────────────────────────────
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks sorted by due date ascending
+      parameters:
+        - name: timeframe
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [today, week, month]
+        - name: show_all
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: show_deleted
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a manual task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task (status, title, due date...)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task (creator or SYSTEM_MANAGER)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
+  # ─── AI LEGAL ASSISTANT ─────────────────────────────────────────────────────
+  /ai/upload:
+    post:
+      operationId: uploadLegalDocument
+      tags: [ai]
+      summary: Upload a legal document for RAG indexing (SYSTEM_MANAGER only)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+      responses:
+        "201":
+          description: Document indexed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegalDocumentSummary"
+        "400":
+          description: Invalid file
+        "403":
+          description: Forbidden
+        "503":
+          description: AI service not configured
+
+  /ai/ask:
+    post:
+      operationId: askLegalAssistant
+      tags: [ai]
+      summary: Ask the AI legal assistant a question (RAG)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: Answer with sources
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+        "400":
+          description: Invalid request
+        "404":
+          description: No indexed documents
+        "503":
+          description: AI service not configured
+
+  /ai/documents:
+    get:
+      operationId: listLegalDocuments
+      tags: [ai]
+      summary: List indexed legal documents (SYSTEM_MANAGER only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LegalDocumentSummary"
+        "403":
+          description: Forbidden
+
+  /ai/clear-index:
+    delete:
+      operationId: clearLegalIndex
+      tags: [ai]
+      summary: Delete ALL indexed legal documents and their vectors (SYSTEM_MANAGER only)
+      responses:
+        "200":
+          description: Index cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deletedDocuments]
+                properties:
+                  deletedDocuments:
+                    type: integer
+        "403":
+          description: Forbidden
+
+  /ai/documents/{id}:
+    delete:
+      operationId: deleteLegalDocument
+      tags: [ai]
+      summary: Delete an indexed legal document (SYSTEM_MANAGER only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
+  # ─── CHAT CONVERSATIONS ─────────────────────────────────────────────────────
+  /ai/conversations:
+    get:
+      operationId: listConversations
+      tags: [ai]
+      summary: List chat conversations with optional date filter
+      parameters:
+        - name: dateFrom
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConversationSummary"
+
+    post:
+      operationId: createConversation
+      tags: [ai]
+      summary: Create a new chat conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
+
+  /ai/conversations/{id}:
+    patch:
+      operationId: updateConversation
+      tags: [ai]
+      summary: Update conversation title or pinned state
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
+        "404":
+          description: Not found
+
+    delete:
+      operationId: deleteConversation
+      tags: [ai]
+      summary: Delete a conversation and all its messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /ai/conversations/{id}/messages:
+    get:
+      operationId: listConversationMessages
+      tags: [ai]
+      summary: Get all messages for a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessageItem"
+        "404":
+          description: Not found
+
+  /ai/conversations/{id}/ask:
+    post:
+      operationId: askInConversation
+      tags: [ai]
+      summary: Ask a question within a conversation (persists both user msg and answer)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: Answer with sources
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+        "404":
+          description: Conversation not found
+        "503":
+          description: AI service not configured
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    # ─── AUTH ─────────────────────────────────────────────────────────────────
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user, token, theme, branding]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+        theme:
+          $ref: "#/components/schemas/TenantTheme"
+        branding:
+          $ref: "#/components/schemas/TenantBranding"
+
+    SessionResponse:
+      type: object
+      required: [user, theme, branding]
+      description: The authenticated user's profile plus their firm's theme and identity.
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        theme:
+          $ref: "#/components/schemas/TenantTheme"
+        branding:
+          $ref: "#/components/schemas/TenantBranding"
+
+    TenantBranding:
+      type: object
+      required: [name, logoUrl]
+      description: The authenticated firm's identity — display name and logo (null when the firm has no uploaded logo).
+      properties:
+        name:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+
+    TenantTheme:
+      type: object
+      required: [primaryColor, secondaryColor]
+      description: The authenticated firm's brand colors (hex), null when unset.
+      properties:
+        primaryColor:
+          type: ["string", "null"]
+        secondaryColor:
+          type: ["string", "null"]
+
+    User:
+      type: object
+      required: [id, email, role, tenantId, createdAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [SYSTEM_MANAGER, TECHNICIAN]
+        tenantId:
+          type: integer
+        createdAt:
+          type: string
+
+    # ─── DASHBOARD ────────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      required: [totalClients, totalCases, activeCases, upcomingHearingsCount, activeExecutions, pendingNotifications, wonCases, lostCases]
+      properties:
+        totalClients:
+          type: integer
+        totalCases:
+          type: integer
+        activeCases:
+          type: integer
+        wonCases:
+          type: integer
+        lostCases:
+          type: integer
+        upcomingHearingsCount:
+          type: integer
+        activeExecutions:
+          type: integer
+        pendingNotifications:
+          type: integer
+
+    CaseStatusBreakdown:
+      type: object
+      required: [underReview, execution, closed]
+      properties:
+        underReview:
+          type: integer
+        execution:
+          type: integer
+        closed:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, entityId, entityType, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        entityId:
+          type: integer
+        entityType:
+          type: string
+        createdAt:
+          type: string
+
+    HearingWithCase:
+      type: object
+      required: [id, caseId, hijriDate, utcDate, caseNumber, clientName]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        hijriDate:
+          type: string
+        utcDate:
+          type: string
+        caseNumber:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+        attendance:
+          type: ["string", "null"]
+        requiresLawsuitEditing:
+          type: boolean
+
+    # ─── CLIENT ───────────────────────────────────────────────────────────────
+    Client:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        nationalId:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        agencyNumber:
+          type: ["string", "null"]
+        agencyEndDate:
+          type: ["string", "null"]
+          format: date
+        agencySource:
+          type: ["string", "null"]
+          enum: [خدمات الموثقين, الخدمات الالكترونية, null]
+        createdAt:
+          type: string
+
+    ClientDetail:
+      type: object
+      required: [id, name, createdAt, cases, contracts]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        nationalId:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        agencyNumber:
+          type: ["string", "null"]
+        agencyEndDate:
+          type: ["string", "null"]
+          format: date
+        agencySource:
+          type: ["string", "null"]
+          enum: [خدمات الموثقين, الخدمات الالكترونية, null]
+        createdAt:
+          type: string
+        cases:
+          type: array
+          items:
+            $ref: "#/components/schemas/Case"
+        contracts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contract"
+
+    ClientInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        nationalId:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+        agencyNumber:
+          type: string
+        agencyEndDate:
+          type: string
+          format: date
+        agencySource:
+          type: string
+          enum: [خدمات الموثقين, الخدمات الالكترونية]
+
+    ClientUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        nationalId:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+        agencyNumber:
+          type: ["string", "null"]
+        agencyEndDate:
+          type: ["string", "null"]
+          format: date
+        agencySource:
+          type: ["string", "null"]
+          enum: [خدمات الموثقين, الخدمات الالكترونية, null]
+
+    # ─── CONTRACT ─────────────────────────────────────────────────────────────
+    Contract:
+      type: object
+      required: [id, clientId, serviceType, hijriDate, isSigned, customClauses, createdAt]
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientName:
+          type: ["string", "null"]
+        serviceType:
+          type: string
+          enum: [FULL_REP, PARTIAL_REP, OBJECTION, CASSATION_REQUEST, CONTRACT_DRAFTING, CONTRACT_REVIEW, LEGAL_CONTRACT_CREATION, CONSULTATION]
+        hijriDate:
+          type: string
+        gregorianDate:
+          type: ["string", "null"]
+        clientNationalId:
+          type: ["string", "null"]
+        clientAddress:
+          type: ["string", "null"]
+        clientPhone:
+          type: ["string", "null"]
+        clientEmail:
+          type: ["string", "null"]
+        caseNumber:
+          type: ["string", "null"]
+        courtName:
+          type: ["string", "null"]
+        caseSubject:
+          type: ["string", "null"]
+        representationScope:
+          type: ["string", "null"]
+        preamble:
+          type: ["string", "null"]
+        fees:
+          type: ["number", "null"]
+        feeInstallments:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/FeeInstallment"
+        isSigned:
+          type: boolean
+        customClauses:
+          type: array
+          items:
+            type: string
+        pdfUrl:
+          type: ["string", "null"]
+        signedPdfUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ContractSignedUploadResult:
+      type: object
+      required: [signedPdfUrl]
+      properties:
+        signedPdfUrl:
+          type: string
+
+    ContractPdfResult:
+      type: object
+      required: [pdfUrl]
+      properties:
+        pdfUrl:
+          type: string
+
+    ContractSendResult:
+      type: object
+      required: [sent, sentTo]
+      properties:
+        sent:
+          type: boolean
+        sentTo:
+          type: string
+
+    FeeInstallment:
+      type: object
+      required: [description, amount, refundable]
+      properties:
+        description:
+          type: string
+        amount:
+          type: number
+        refundable:
+          type: boolean
+
+    ContractInput:
+      type: object
+      required: [clientId, serviceType, hijriDate]
+      properties:
+        clientId:
+          type: integer
+        serviceType:
+          type: string
+          enum: [FULL_REP, PARTIAL_REP, OBJECTION, CASSATION_REQUEST, CONTRACT_DRAFTING, CONTRACT_REVIEW, LEGAL_CONTRACT_CREATION, CONSULTATION]
+        hijriDate:
+          type: string
+        gregorianDate:
+          type: string
+        clientNationalId:
+          type: string
+        clientAddress:
+          type: string
+        clientPhone:
+          type: string
+        clientEmail:
+          type: string
+        caseNumber:
+          type: string
+        courtName:
+          type: string
+        caseSubject:
+          type: string
+        representationScope:
+          type: string
+        preamble:
+          type: string
+        fees:
+          type: number
+        feeInstallments:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeeInstallment"
+        isSigned:
+          type: boolean
+        customClauses:
+          type: array
+          items:
+            type: string
+
+    ContractUpdate:
+      type: object
+      properties:
+        serviceType:
+          type: string
+          enum: [FULL_REP, PARTIAL_REP, OBJECTION, CASSATION_REQUEST, CONTRACT_DRAFTING, CONTRACT_REVIEW, LEGAL_CONTRACT_CREATION, CONSULTATION]
+        hijriDate:
+          type: string
+        gregorianDate:
+          type: string
+        clientNationalId:
+          type: string
+        clientAddress:
+          type: string
+        clientPhone:
+          type: string
+        clientEmail:
+          type: string
+        caseNumber:
+          type: string
+        courtName:
+          type: string
+        caseSubject:
+          type: string
+        representationScope:
+          type: string
+        preamble:
+          type: string
+        fees:
+          type: number
+        feeInstallments:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeeInstallment"
+        isSigned:
+          type: boolean
+        customClauses:
+          type: array
+          items:
+            type: string
+
+    # ─── CASE DOCUMENTS ──────────────────────────────────────────────────────
+    CaseDocument:
+      type: object
+      required: [id, caseId, fileName, mimeType, submittedToCourt, uploadedAt]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        fileName:
+          type: string
+        mimeType:
+          type: string
+        submittedToCourt:
+          type: boolean
+        courtReplyType:
+          type: ["string", "null"]
+          enum: [PLAINTIFF, DEFENDANT, null]
+        courtNotes:
+          type: ["string", "null"]
+        submittedByName:
+          type: ["string", "null"]
+        submittedByRole:
+          type: ["string", "null"]
+        uploadedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: ["string", "null"]
+          format: date-time
+        deletedByName:
+          type: ["string", "null"]
+        deletedByRole:
+          type: ["string", "null"]
+
+    UploadCaseDocumentBody:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+
+    UpdateCaseDocumentInput:
+      type: object
+      properties:
+        submittedToCourt:
+          type: boolean
+        courtReplyType:
+          type: ["string", "null"]
+          enum: [PLAINTIFF, DEFENDANT, null]
+        courtNotes:
+          type: ["string", "null"]
+
+    # ─── CASE ─────────────────────────────────────────────────────────────────
+    Case:
+      type: object
+      required: [id, clientId, status, outcome, createdAt]
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientName:
+          type: ["string", "null"]
+        jurisdiction:
+          type: ["string", "null"]
+        clientRole:
+          type: ["string", "null"]
+          enum: [PLAINTIFF, DEFENDANT, null]
+        opponentName:
+          type: ["string", "null"]
+        subject:
+          type: ["string", "null"]
+        caseNumber:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [UNDER_REVIEW, APPEAL, EXECUTION, CLOSED]
+        outcome:
+          type: string
+          enum: [WON, LOST, PENDING]
+        deletedAt:
+          type: ["string", "null"]
+        deletedByName:
+          type: ["string", "null"]
+        deletedByRole:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    CaseDetail:
+      type: object
+      required: [id, clientId, status, outcome, createdAt, pleadings, hearings, executions]
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientName:
+          type: ["string", "null"]
+        jurisdiction:
+          type: ["string", "null"]
+        clientRole:
+          type: ["string", "null"]
+          enum: [PLAINTIFF, DEFENDANT, null]
+        opponentName:
+          type: ["string", "null"]
+        subject:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        caseNumber:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [UNDER_REVIEW, APPEAL, EXECUTION, CLOSED]
+        outcome:
+          type: string
+          enum: [WON, LOST, PENDING]
+        deletedAt:
+          type: ["string", "null"]
+        deletedByName:
+          type: ["string", "null"]
+        deletedByRole:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        pleadings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pleading"
+        hearings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hearing"
+        executions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Execution"
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/CaseDocument"
+
+    NewCaseClientInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        nationalId:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+        agencyNumber:
+          type: string
+        agencyEndDate:
+          type: string
+          format: date
+        agencySource:
+          type: string
+          enum: [خدمات الموثقين, الخدمات الالكترونية]
+
+    CaseInput:
+      type: object
+      description: Provide exactly one of clientId or newClient.
+      properties:
+        clientId:
+          type: integer
+        newClient:
+          $ref: "#/components/schemas/NewCaseClientInput"
+        jurisdiction:
+          type: string
+        clientRole:
+          type: string
+          enum: [PLAINTIFF, DEFENDANT]
+        opponentName:
+          type: string
+        subject:
+          type: string
+        caseNumber:
+          type: string
+        status:
+          type: string
+          enum: [UNDER_REVIEW, APPEAL, EXECUTION, CLOSED]
+        outcome:
+          type: string
+          enum: [WON, LOST, PENDING]
+
+    CaseUpdate:
+      type: object
+      properties:
+        jurisdiction:
+          type: string
+        clientRole:
+          type: string
+          enum: [PLAINTIFF, DEFENDANT]
+        opponentName:
+          type: string
+        subject:
+          type: string
+        description:
+          type: string
+        caseNumber:
+          type: string
+        status:
+          type: string
+          enum: [UNDER_REVIEW, APPEAL, EXECUTION, CLOSED]
+        outcome:
+          type: string
+          enum: [WON, LOST, PENDING]
+
+    # ─── PLEADING ─────────────────────────────────────────────────────────────
+    Pleading:
+      type: object
+      required: [id, caseId, type, content, status, createdAt]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        type:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED]
+        managerNotes:
+          type: ["string", "null"]
+        addedById:
+          type: ["integer", "null"]
+        addedByName:
+          type: ["string", "null"]
+        addedByRole:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PleadingInput:
+      type: object
+      required: [caseId]
+      properties:
+        caseId:
+          type: integer
+        type:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED]
+        managerNotes:
+          type: string
+
+    PleadingUpdate:
+      type: object
+      properties:
+        type:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED]
+        managerNotes:
+          type: string
+
+    # ─── HEARING ──────────────────────────────────────────────────────────────
+    Hearing:
+      type: object
+      required: [id, caseId, hijriDate, utcDate, requiresLawsuitEditing, effectiveStatus, createdAt]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        hijriDate:
+          type: string
+        utcDate:
+          type: string
+        status:
+          type: ["string", "null"]
+          enum: [UPCOMING, ENDED, CANCELLED, null]
+        effectiveStatus:
+          type: string
+          enum: [UPCOMING, ENDED, CANCELLED]
+        attendance:
+          type: ["string", "null"]
+        transcriptUrl:
+          type: ["string", "null"]
+        hearingReport:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        requiresLawsuitEditing:
+          type: boolean
+        requiresReplyPrep:
+          type: boolean
+        sessionLink:
+          type: ["string", "null"]
+        alertSent48h:
+          type: boolean
+        postHearingLocked:
+          type: boolean
+        createdAt:
+          type: string
+
+    HearingInput:
+      type: object
+      required: [caseId, hijriDate, utcDate]
+      properties:
+        caseId:
+          type: integer
+        hijriDate:
+          type: string
+        utcDate:
+          type: string
+        attendance:
+          type: string
+        transcriptUrl:
+          type: string
+        hearingReport:
+          type: string
+        notes:
+          type: string
+        requiresLawsuitEditing:
+          type: boolean
+        requiresReplyPrep:
+          type: boolean
+        sessionLink:
+          type: string
+
+    HearingUpdate:
+      type: object
+      properties:
+        status:
+          type: ["string", "null"]
+          enum: [UPCOMING, ENDED, CANCELLED, null]
+        hijriDate:
+          type: string
+        utcDate:
+          type: string
+        attendance:
+          type: string
+        transcriptUrl:
+          type: string
+        hearingReport:
+          type: string
+        notes:
+          type: string
+        requiresLawsuitEditing:
+          type: boolean
+        requiresReplyPrep:
+          type: boolean
+        sessionLink:
+          type: string
+
+    # ─── EXECUTION ────────────────────────────────────────────────────────────
+    Execution:
+      type: object
+      required: [id, caseId, status, totalAmount, paidAmount, remainingAmount, createdAt]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        executionNumber:
+          type: ["string", "null"]
+        type:
+          type: ["string", "null"]
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+        remainingAmount:
+          type: number
+        lastReminderDate:
+          type: ["string", "null"]
+        lastWithdrawalAt:
+          type: ["string", "null"]
+        lastWithdrawalBy:
+          type: ["string", "null"]
+        lastTransferOrderAt:
+          type: ["string", "null"]
+          format: date-time
+        transferOrderCount:
+          type: integer
+          description: Total number of transfer orders recorded for this execution
+        status:
+          type: string
+          enum: [ACTIVE, FULL_PAYMENT, PARTIAL_PAYMENT, SETTLEMENT]
+        createdAt:
+          type: string
+
+    ExecutionTransferOrderSummary:
+      type: object
+      required: [pendingCount]
+      properties:
+        pendingCount:
+          type: integer
+
+    TransferOrderLog:
+      type: object
+      required: [id, executionId, tenantId, createdAt, createdBy]
+      properties:
+        id:
+          type: integer
+        executionId:
+          type: integer
+        tenantId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+
+    ExecutionInput:
+      type: object
+      required: [caseId, totalAmount, paidAmount]
+      properties:
+        caseId:
+          type: integer
+        executionNumber:
+          type: string
+        type:
+          type: string
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+        status:
+          type: string
+          enum: [ACTIVE, FULL_PAYMENT, PARTIAL_PAYMENT, SETTLEMENT]
+
+    ExecutionUpdate:
+      type: object
+      properties:
+        executionNumber:
+          type: string
+        type:
+          type: string
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+        status:
+          type: string
+          enum: [ACTIVE, FULL_PAYMENT, PARTIAL_PAYMENT, SETTLEMENT]
+
+    # ─── MOJ DIRECTORY ────────────────────────────────────────────────────────
+    MojDirectoryEntry:
+      type: object
+      required: [id, courtName, emailAddress]
+      properties:
+        id:
+          type: integer
+        courtName:
+          type: string
+        emailAddress:
+          type: string
+
+    MojDirectorySearchResult:
+      type: object
+      required: [results, total]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MojDirectoryEntry"
+        total:
+          type: integer
+
+    MojUploadResult:
+      type: object
+      required: [inserted, message]
+      properties:
+        inserted:
+          type: integer
+        message:
+          type: string
+
+    # ─── NOTIFICATION ─────────────────────────────────────────────────────────
+    Notification:
+      type: object
+      required: [id, type, message, isRead, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [HEARING_48H_ALERT, HEARING_TRANSCRIPT_LOCK, EXECUTION_REMINDER, GENERAL]
+        message:
+          type: string
+        relatedEntityId:
+          type: ["integer", "null"]
+        relatedEntityType:
+          type: ["string", "null"]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+
+    # ─── USERS / SETTINGS / TASKS ─────────────────────────────────────────────
+    UserSummary:
+      type: object
+      required: [id, email, role, tenantId]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [SYSTEM_MANAGER, TECHNICIAN]
+        tenantId:
+          type: integer
+        avatarBase64:
+          type: ["string", "null"]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        avatarBase64:
+          type: ["string", "null"]
+
+    UserInput:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+          enum: [SYSTEM_MANAGER, TECHNICIAN]
+        phone:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+          enum: [SYSTEM_MANAGER, TECHNICIAN]
+        phone:
+          type: ["string", "null"]
+
+    SystemSetting:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+        value:
+          type: boolean
+          nullable: true
+        numericValue:
+          type: integer
+          nullable: true
+        textValue:
+          type: string
+          nullable: true
+
+    TestEmailInput:
+      type: object
+      required: [to]
+      properties:
+        to:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 320
+
+    TestEmailResponse:
+      type: object
+      required: [success, message, recipient]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        recipient:
+          type: string
+          format: email
+
+    Task:
+      type: object
+      required: [id, title, taskType, status, dueDate, assignedById, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        taskType:
+          type: string
+          enum: [MANUAL, HEARING_AUTO]
+        status:
+          type: string
+          enum: [PENDING, COMPLETED]
+        dueDate:
+          type: string
+          format: date-time
+        assignedById:
+          type: integer
+        assignedByName:
+          type: ["string", "null"]
+        assignedToId:
+          type: ["integer", "null"]
+        assignedToName:
+          type: ["string", "null"]
+        relatedHearingId:
+          type: ["integer", "null"]
+        caseId:
+          type: ["integer", "null"]
+        caseName:
+          type: ["string", "null"]
+        linkUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    CreateTaskInput:
+      type: object
+      required: [title, dueDate]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: ["string", "null"]
+        dueDate:
+          type: string
+          format: date-time
+        assignedToId:
+          type: ["integer", "null"]
+        caseId:
+          type: ["integer", "null"]
+        linkUrl:
+          type: ["string", "null"]
+
+    UpdateTaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: ["string", "null"]
+        dueDate:
+          type: string
+          format: date-time
+        assignedToId:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [PENDING, COMPLETED]
+        linkUrl:
+          type: ["string", "null"]
+
+    LegalDocumentSummary:
+      type: object
+      required: [id, title, uploadedAt, chunkCount]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        chunkCount:
+          type: integer
+
+    AskRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 4000
+
+    AskSource:
+      type: object
+      required: [id, content, documentTitle]
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        documentTitle:
+          type: string
+
+    AskResponse:
+      type: object
+      required: [answer, sources]
+      properties:
+        answer:
+          type: string
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/AskSource"
+
+    ConversationSummary:
+      type: object
+      required: [id, title, isPinned, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        isPinned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateConversationInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+
+    UpdateConversationInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        isPinned:
+          type: boolean
+
+    MissedPushItem:
+      type: object
+      required: [id, title, failedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+        failureReason:
+          type: string
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+
+    MissedPushResponse:
+      type: object
+      required: [count, items]
+      properties:
+        count:
+          type: integer
+          description: Number of unacknowledged missed push notifications
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissedPushItem"
+
+    ChatMessageItem:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        sources:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/AskSource"
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,7 @@
+- [Multi-tenant isolation pattern](tenant-isolation.md) — scoped()/tenantStamp() on every firm-owned query; moj_directory global; JWT secret must not fall back.
+- [OpenAI embeddings need user key](openai-embeddings-key.md) — Replit AI proxy has no embeddings API; RAG requires the user's own OPENAI_API_KEY.
+- [Ephemeral production filesystem](ephemeral-prod-filesystem.md) — republish wipes runtime-written files while DB references persist; regenerate on demand or use Object Storage.
+- [Per-tenant theming](per-tenant-theming.md) — firm brand colors injected on :root (not a wrapper) so relative-color border vars recompute; null colors = default fallback.
+- [pdfjs-dist in bundled Node servers](pdfjs-node-bundling.md) — must be externalized (plus @napi-rs/canvas installed) or it fails with DOMMatrix/worker errors at runtime.
+- [Single-firm mode](single-firm-mode.md) — towala-platform, SUPER_ADMIN, subscriptions, payments all removed; only SYSTEM_MANAGER and TECHNICIAN roles remain; scoped() no longer has SUPER_ADMIN bypass.
+- [Resumable email delivery](resumable-email-delivery.md) — persist provider acceptance separately; retries reuse a tenant/user-scoped attempt ID until report finalization succeeds.

@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "last_missed_ack_at" timestamp with time zone;

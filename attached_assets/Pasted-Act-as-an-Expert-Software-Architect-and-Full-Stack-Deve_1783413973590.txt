@@ -1,0 +1,52 @@
+Act as an Expert Software Architect and Full-Stack Developer. Your task is to build the robust backend foundation for the "Majed Sultan Al-Subaie Law Firm ERP System", an advanced Legal Practice Management system.
+
+Tech Stack Preference: Node.js, Express, and PostgreSQL (via Prisma ORM).
+
+Please generate the database models, RBAC middleware, and core API logic based on the following business requirements:
+
+1. USER ROLES & PERMISSIONS (RBAC)
+
+SYSTEM_MANAGER: Absolute full access to all endpoints, including financial data, salaries, and contract fees.
+
+TECHNICIAN: Full operational access (Clients, Cases, Pleadings, Hearings, Executions). However, this role MUST BE STRICTLY BLOCKED from accessing any endpoints, tables, or data fields related to Salaries, Contract Fees, and Financial Analytics.
+
+2. DATABASE SCHEMA (Prisma Models)
+
+User: id, email, password_hash, role (ENUM: SYSTEM_MANAGER, TECHNICIAN).
+
+Client: id, email, phone, created_at.
+
+Contract: id, client_id (FK), service_type (ENUM: FULL_REP, PARTIAL_REP, OBJECTION, CASSATION_REQUEST, CONTRACT_DRAFTING, CONTRACT_REVIEW, LEGAL_CONTRACT_CREATION, CONSULTATION), hijri_date, preamble, fees (Decimal - Restricted), is_signed.
+
+Case: id, client_id (FK), jurisdiction, opponent_name, subject, case_number, status (ENUM: UNDER_REVIEW, EXECUTION, CLOSED). (Note: UNDER_REVIEW means 'تحت النظر', CLOSED means 'منتهيه').
+
+Pleading: id, case_id (FK), type, content, status (ENUM: DRAFT, SUBMITTED), manager_notes.
+
+Hearing: id, case_id (FK), hijri_date, utc_date (for precise cron jobs), attendance, transcript_url, hearing_report, required_lawsuit_editing (Boolean, default: true).
+
+Execution: id, case_id (FK), execution_number, type, total_amount (Decimal), paid_amount (Decimal), remaining_amount (Decimal), last_reminder_date, status (ENUM: ACTIVE, FULL_PAYMENT, PARTIAL_PAYMENT, SETTLEMENT).
+
+3. AUTOMATION & BUSINESS LOGIC (Implement via node-cron or similar)
+
+48-Hour Hearing Rule: A cron job that checks Hearing.utc_date. If it is exactly 48 hours away, trigger a system notification demanding the upload of the "Lawsuit Editing" document.
+
+7-Day Post-Hearing Lock: After a hearing passes, the system flags the case for a mandatory 7-day restriction where the user must upload the hearing transcript and report.
+
+Execution Reminders & Auto-Math: A cron job that triggers every 7 days for any Execution where status != 'CLOSED', reminding the user to update it. Furthermore, ensure the backend auto-calculates remaining_amount = total_amount - paid_amount upon any payment update.
+
+4. INTEGRATION PLACEHOLDERS & UTILITIES
+
+Create a placeholder utility for WhatsApp/Email API integration (triggered when a Contract is generated).
+
+Create an endpoint for "MoJ Directory Search" (Ministry of Justice emails) that can query a pre-seeded table of Courts and Emails.
+
+Ensure all dates handled by the API account for Hijri calendar storage/retrieval standards.
+
+Output Requirements:
+
+Provide the complete schema.prisma file.
+
+Provide the RBAC Middleware code demonstrating how the TECHNICIAN is blocked from financial routes.
+
+Provide the setup for the 3 Cron Jobs (48-hour rule, 7-day post-hearing rule, 7-day execution reminder).
+Write production-grade, clean, and well-documented code.

@@ -1,0 +1,125 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784116742287,
+      "tag": "0000_thick_maginty",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784308024582,
+      "tag": "0001_black_human_cannonball",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752796800000,
+      "tag": "0002_system_settings_numeric_value",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752883200000,
+      "tag": "0003_executions_updated_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1752969600000,
+      "tag": "0004_executions_updated_at_trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753056000000,
+      "tag": "0005_cases_contracts_updated_at_trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786428361514,
+      "tag": "0006_add_user_id_to_push_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786428741892,
+      "tag": "0007_add_user_id_to_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786525654520,
+      "tag": "0008_add_last_seen_at_to_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786526051478,
+      "tag": "0009_add_missed_ack_at_to_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786574907888,
+      "tag": "0010_add_push_failed_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786575254112,
+      "tag": "0011_add_expo_push_receipt_queue",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786960224000,
+      "tag": "0012_add_case_id_to_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1755216000000,
+      "tag": "0013_hearings_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1786966222665,
+      "tag": "0014_add_status_to_hearings",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1786968236786,
+      "tag": "0015_add_seq_number_to_contracts",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1787032686219,
+      "tag": "0016_add_client_reports",
+      "breakpoints": true
+    }
+  ]
+}

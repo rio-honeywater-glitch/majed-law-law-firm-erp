@@ -1,0 +1,23 @@
+Act as an Expert Full-Stack Developer and AI Engineer. The core ERP for "Majed Sultan Al-Subaie Law Firm" is complete. We now need to build the "AI Legal Assistant" (RAG Engine) module.
+
+Please implement this feature using Node.js, Express, React, and Prisma, following these strict requirements:
+
+1. DATABASE SCHEMA UPDATES (Prisma + pgvector):
+- Add a model `LegalDocument`: id (UUID), title (String), uploaded_at (DateTime).
+- Add a model `LegalChunk`: id (UUID), document_id (FK), content (Text).
+- Note: Since standard Prisma doesn't natively support pgvector perfectly without raw SQL, please set up the necessary raw SQL migrations to enable the `vector` extension and add a `vector(1536)` column to the `LegalChunk` table for storing embeddings.
+
+2. BACKEND RAG LOGIC (Node.js/OpenAI):
+- Install required packages (e.g., `openai`, `pdf-parse`).
+- API 1 (Upload - Restricted to SYSTEM_MANAGER): `POST /api/ai/upload`. Accepts a PDF/Text file of a legal code. Extracts text, chunks it appropriately (handling Arabic properly), calls OpenAI's `text-embedding-3-small` API to get embeddings, and saves chunks + vectors to the DB.
+- API 2 (Ask - Open to all users): `POST /api/ai/ask`. Accepts a user query (`{ prompt: string }`). Creates an embedding for the query, performs a vector similarity search (Cosine Distance via raw SQL in Prisma) to find the top 3 relevant `LegalChunk`s. 
+- Prompt Engineering inside API 2: Pass the retrieved chunks to `gpt-4o-mini` with a strict system prompt: "You are an expert Saudi Legal Assistant. Answer the user's question using ONLY the provided context chunks. Do not hallucinate. Explain the retrieved articles clearly."
+
+3. FRONTEND IMPLEMENTATION (React - RTL & Gold/Black Identity):
+- Create a new "المساعد القانوني" (Legal Assistant) page.
+- The UI should look like a sleek, professional Chat/Search interface.
+- Add an input field at the bottom. When the user asks a question, display the loading state, then render the AI's response in a chat bubble.
+- MUST display a "Sources" (المصادر) section below the AI response showing the original raw text extracted from the database to prove authenticity.
+- Add a secure, hidden section (or tab) visible ONLY to `SYSTEM_MANAGER` for uploading new legal documents.
+
+Write clean, production-ready code handling Arabic encoding flawlessly. Provide the updated schema, the raw SQL for pgvector, the AI controllers, and the React UI.

@@ -1,0 +1,52 @@
+Act as an Expert Full-Stack Developer and Software Architect.
+I need to implement the "MoJ Directory AI-OCR Extraction Unit" for the "Majed Sultan Al-Subaie Law Firm" ERP system.
+
+Please build the backend logic and the frontend interface for this feature based on the following requirements:
+
+1. Database Schema Update (Prisma):
+Add a new model MoJ_Directory:
+
+id (Int, @id, @default(autoincrement()))
+
+court_name (String)
+
+email_address (String)
+Ensure court_name is indexed for fast searching.
+
+2. Backend PDF Parsing Logic (Node.js/Express):
+
+Create a protected endpoint: POST /api/moj-directory/upload. (Restrict access to SYSTEM_MANAGER only using existing RBAC middleware).
+
+Use a library like pdf-parse (and multer for handling uploads) to extract text from a static Ministry of Justice PDF directory.
+
+Write a robust Regex extraction algorithm. The algorithm must scan the parsed text, identify the email address (containing @moj.gov.sa), and extract the adjacent text as the court_name.
+
+The logic must clear/truncate the existing MoJ_Directory table and bulk insert the newly extracted data pairs (court_name, email_address).
+
+3. Search API Endpoint:
+
+Create an endpoint: GET /api/moj-directory/search?query=YOUR_SEARCH_TERM.
+
+Implement a database query to perform a partial text search (e.g., contains in Prisma, ignoring case) on the court_name field.
+
+4. Frontend Implementation (React):
+
+Create a new dedicated page component: "دليل الجهات الحكومية" (MoJ Directory).
+
+Add a sleek, RTL-aligned Search Bar at the top of the page.
+
+As the user types in the Search Bar, dynamically fetch and display the results below.
+
+Display the results in a clean table. Each result MUST include:
+
+The Court/Department Name.
+
+The Email Address.
+
+A "نسخ" (Copy) button to copy the email to the clipboard.
+
+A prominent "مراسلة" (Send Email) button that uses the mailto: protocol to instantly open the user's default email client.
+
+Add a secure file upload section (Upload PDF) that is visible and accessible ONLY to the SYSTEM_MANAGER.
+
+Ensure the frontend adheres to the established Gold/Black visual identity, RTL constraints, and uses the Tajawal font. Provide the necessary backend controllers, routes, and frontend component code.

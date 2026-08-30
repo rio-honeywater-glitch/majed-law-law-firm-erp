@@ -1,0 +1,46 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import authRouter from "./auth";
+import dashboardRouter from "./dashboard";
+import clientsRouter from "./clients";
+import contractsRouter from "./contracts";
+import casesRouter from "./cases";
+import pleadingsRouter from "./pleadings";
+import hearingsRouter from "./hearings";
+import executionsRouter from "./executions";
+import notificationsRouter from "./notifications";
+import mojDirectoryRouter from "./moj-directory";
+import uploadsRouter from "./uploads";
+import tasksRouter from "./tasks";
+import settingsRouter from "./settings";
+import usersRouter from "./users";
+import profileRouter from "./profile";
+import aiRouter from "./ai";
+import meetingsRouter from "./meetings";
+import pushRouter from "./push";
+import financesRouter from "./finances";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use("/auth", authRouter);
+router.use("/dashboard", dashboardRouter);
+router.use("/clients", clientsRouter);
+router.use("/contracts", contractsRouter);
+router.use("/cases", casesRouter);
+router.use("/pleadings", pleadingsRouter);
+router.use("/hearings", hearingsRouter);
+router.use("/executions", executionsRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/moj-directory", mojDirectoryRouter);
+router.use("/uploads", uploadsRouter);
+router.use("/tasks", tasksRouter);
+router.use("/settings", settingsRouter);
+router.use("/users", usersRouter);
+router.use("/profile", profileRouter);
+router.use("/ai", aiRouter);
+router.use("/meetings", meetingsRouter);
+router.use("/push", pushRouter);
+router.use("/finances", financesRouter);
+
+export default router;

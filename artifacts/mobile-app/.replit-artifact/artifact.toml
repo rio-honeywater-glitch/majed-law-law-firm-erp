@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/mobile-app/"
+title = "تطبيق المحامين - مجد سلطان السبيعي"
+description = "تطبيق موبايل مصاحب لنظام ERP لمكتب المحاماة. يتيح للمحامين متابعة القضايا والجلسات والمهام والإشعارات من هواتفهم أثناء التنقل بين المحاكم والاجتماعات. يدعم push notifications أصيلة عبر Expo Notifications."
+version = "1.0.0"
+id = "artifacts/mobile-app"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/mobile-app/" ]
+localPort = 24382
+
+[services.development]
+run = "pnpm --filter @workspace/mobile-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mobile-app", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/mobile-app", "run", "serve" ]
+
+[services.env]
+PORT = "24382"
+BASE_PATH = "/mobile-app/"

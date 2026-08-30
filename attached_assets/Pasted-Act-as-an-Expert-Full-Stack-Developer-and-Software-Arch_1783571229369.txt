@@ -1,0 +1,33 @@
+Act as an Expert Full-Stack Developer and Software Architect. > We need to build and integrate a new "Tasks Management Dashboard" (صفحة المهام المشتركة) for the "Majed Sultan Al-Subaie Law Firm" ERP system.
+
+Please implement this feature strictly following these requirements:
+
+1. Database Schema Updates (Prisma):
+
+Create a Task model: id, title, description, task_type (ENUM: MANUAL, HEARING_AUTO), status (ENUM: PENDING, COMPLETED), due_date (DateTime - requires exact time), created_at (DateTime), assigned_by_id (FK to User), assigned_to_id (FK to User), and related_hearing_id (FK to Hearing, nullable).
+
+Create a SystemSettings model to handle global toggles: id, key (e.g., TASKS_MODULE_VISIBLE), value (Boolean).
+
+2. Backend Logic (Node.js/Express):
+
+Settings API: Create an endpoint to toggle the TASKS_MODULE_VISIBLE setting (Restricted to SYSTEM_MANAGER).
+
+Tasks API: Create CRUD endpoints for Tasks.
+
+Filters & Sorting: The GET /api/tasks endpoint MUST accept query parameters for time filters (timeframe=today|week|month) and visibility (show_all=true|false). Sort tasks by due_date ascending.
+
+Automation Sync: Modify the existing Hearing creation logic: Whenever a new Hearing is created, automatically generate a Task with task_type="HEARING_AUTO", set the due_date to the hearing time, and make it visible to the team.
+
+3. Frontend Implementation (React):
+
+Visibility Toggle: Wrap the "Tasks" Sidebar link and routing in a conditional check based on the TASKS_MODULE_VISIBLE setting. Add a toggle switch in the System Settings page for the Manager to hide/show the module globally.
+
+Tasks Dashboard Page: Build a clean, RTL-aligned UI.
+
+Filter Bar: At the top, add quick filter buttons (مهام اليوم, مهام الأسبوع, مهام الشهر) and a toggle switch (إظهار مهام الجميع).
+
+Task Cards: Each task must clearly display: Task Title, Type badge (جلسة / يدوية), Assignee name, Assigner name (بواسطة: فلاناً), Creation Date, and Exact Due Date & Time.
+
+Creation Modal: A sleek form to manually assign tasks to team members with a precise date/time picker.
+
+Ensure the design perfectly matches the Gold/Black visual identity, uses the "Tajawal" font, and handles Arabic RTL flawlessly. Provide the updated schema, backend controllers, and the React page component.

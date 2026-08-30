@@ -1,0 +1,30 @@
+Act as an Expert Full-Stack Developer. > The client has tested the "Majed Sultan Al-Subaie Law Firm" system and reported three critical missing functional gaps. Please fix them immediately by implementing the following requirements:
+
+1. Fix Cases Page Action Icons (صفحة القضايا):
+In the Cases page (or Case Details), there are UI icons that are currently dead (do nothing when clicked). You MUST wire them up to fully functional Modals (Dialogs) connected to the backend APIs:
+
+تعديل القضية (Edit Case): Opens a modal to edit case details (Status, Subject, Opponent, etc.).
+
+إضافة مذكرة (Add Pleading): Opens a modal with a form to create a new Pleading for this case.
+
+إضافة جلسة (Add Hearing): Opens a modal to schedule a new Hearing (requires Date, Time, etc.).
+
+طلب التنفيذ (Add Execution): Opens a modal to create a new Execution record directly linked to this case.
+
+2. Add Missing Button in Executions Page (صفحة التنفيذ):
+The Executions dashboard is missing a primary creation button. Add a prominent "إضافة طلب تنفيذ" (Add Execution Request) button at the top of the page. Clicking it should open a modal that allows the user to select an existing Case from a dropdown, enter the execution number, type, and total amount, then submit to the backend.
+
+3. Build the User Management Module (إدارة المستخدمين):
+Currently, users can only be added manually via the Agent. We need a proper User Management system.
+
+Backend: Ensure there are secure CRUD endpoints for /api/users (GET, POST, PUT, DELETE) restricted STRICTLY to the SYSTEM_MANAGER role. Ensure new user passwords are encrypted/hashed (e.g., using bcrypt).
+
+Frontend: Create a new page called "إدارة المستخدمين" (User Management).
+
+Add a link to this page in the Sidebar, visible ONLY to the SYSTEM_MANAGER.
+
+The page should display a table of all registered users (Name, Email, Role).
+
+Add an "إضافة مستخدم جديد" (Add New User) button that opens a form requesting: Name, Email, Password, and Role (SYSTEM_MANAGER or TECHNICIAN).
+
+Ensure all new UI components strictly follow the RTL Arabic layout, use the Tajawal font, and match the firm's Gold/Black identity. Provide the necessary updated React components and Express controllers.

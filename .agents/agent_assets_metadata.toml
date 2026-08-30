@@ -1,0 +1,14 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Py_iPxsStJgMmh0DFrhgq"
+uri = "file://%D8%AF%D9%84%D9%8A%D9%84-%D9%85%D8%B3%D8%AA%D8%AE%D8%AF%D9%85-%D9%86%D8%B8%D8%A7%D9%85-ERP.pdf"
+type = "pdf"
+title = "دليل المستخدم التشغيلي — PDF (مع صور حقيقية من النظام)"
+
+[[outputs]]
+id = "bFlzX2VIO6oQmABROFalr"
+uri = "file://%D8%AF%D9%84%D9%8A%D9%84-%D9%85%D8%B3%D8%AA%D8%AE%D8%AF%D9%85-%D9%86%D8%B8%D8%A7%D9%85-ERP.docx"
+type = "word_document"
+title = "دليل المستخدم التشغيلي — Word"
