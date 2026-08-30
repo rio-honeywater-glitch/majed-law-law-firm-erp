@@ -1,0 +1,23 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "packageManager": "pnpm@10.26.1",
+  "scripts": {
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "check:generated-api": "sh -c 'generated=\"lib/api-client-react/src/generated lib/api-zod/src/generated\"; if ! git diff --quiet HEAD -- $generated || [ -n \"$(git ls-files --others --exclude-standard -- $generated)\" ]; then echo \"Generated API contract files are out of date. Run pnpm --filter @workspace/api-spec run codegen and commit the result.\" >&2; git status --short --untracked-files=all -- $generated; exit 1; fi'",
+    "check:api-contracts": "pnpm --filter @workspace/api-spec run codegen && pnpm --filter @workspace/api-client-react run typecheck && pnpm --filter @workspace/api-zod run typecheck && pnpm run check:generated-api",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run check:api-contracts && pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+  },
+  "private": true,
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.1",
+    "docx": "^9.7.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.4",
+    "typescript": "~5.9.3"
+  }
+}
